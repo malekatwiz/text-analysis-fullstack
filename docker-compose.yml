@@ -1,0 +1,20 @@
+services:
+  jobstrackingapp:
+    build:
+      context: ./frontend/jobs-app
+    container_name: jobs-app
+    # environment:
+    #   - VITE_TEXT_PROCESSOR_API_URL=http://textprocessorapi:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - textprocessorapi
+  textprocessorapi:
+    build:
+      context: ./backend/text-api
+    container_name: text-api
+    ports:
+      - "8000:8000"
+networks:
+  default:
+    name: jobs-tracking-network
