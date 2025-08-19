@@ -1,0 +1,15 @@
+# Ignore node_modules
+node_modules
+
+# Ignore build output
+dist
+build
+
+.idea
+
+# .NET generated files
+**/bin/
+**/obj/
+**/*.vs/
+**/*.user
+**/launchSettings.json

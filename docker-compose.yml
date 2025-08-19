@@ -15,6 +15,25 @@ services:
     container_name: text-api
     ports:
       - "8000:8000"
+  jobsapi:
+    build:
+      context: ./backend/Jobs
+      dockerfile: Jobs.Api/Dockerfile
+    container_name: jobs-api
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - MongoDb__ConnectionString=mongodb://jobs-db:27017
+      - MongoDb__DatabaseName=Jobs
+      - MongoDb__CollectionName=job_postings
+    depends_on:
+      - jobsdb
+  jobsdb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: jobs-db
+    ports:
+      - "27017:27017"
 networks:
   default:
     name: jobs-tracking-network

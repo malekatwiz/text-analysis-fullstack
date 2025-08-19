@@ -1,12 +1,13 @@
 import logging
+import uuid
 from abc import ABC
 
 from fastapi import FastAPI, Depends
+from pydantic import BaseModel, Field
 from starlette.middleware.cors import CORSMiddleware
 
-from text_processors import TextOperationsFactory, TextOperation
-from pydantic import BaseModel, Field
-import uuid
+from operations.text_operations import TextOperationsFactory, TextOperation
+
 
 class OperationRequest(BaseModel, ABC):
     """
@@ -64,19 +65,15 @@ async def list_operations():
     """
     List all available text operations.
     """
-    operations = TextOperationsFactory().get_available_operations()
-    return {"available_operations": operations}
+    return {"available_operations": TextOperationsFactory.list_available_operations()}
 
 @text_operations_router.post("/{operation_name}")
 async def process_text(request: TextOperationRequest, processor: TextOperation = Depends(resolve_text_operation)):
     try:
-        logging.info(f"Processing text with operation: {processor.operation_name}")
-        operation_result = processor.execute(request.text_content)
+        operation_result = processor.run(request.text_content)
         return {
             "request_id": request.request_id,
-            "operation": processor.operation_name,
-            "duration_ms": operation_result.execution_time,
-            "result": operation_result.results
+            "result": operation_result
         }
     except Exception as e:
         logging.error(f"Error processing text: {e}")

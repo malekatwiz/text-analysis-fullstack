@@ -1,0 +1,14 @@
+@Jobs.Api_HostAddress = http://localhost:5182
+
+GET {{Jobs.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{Jobs.Api_HostAddress}}/jobs/postings/
+Accept: application/json
+Content-Type: application/json
+{
+  "source_link": "http://localhost/jobs/new-post-abc",
+  "description": "Company, and Role description"
+}
