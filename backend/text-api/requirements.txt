@@ -3,3 +3,5 @@ uvicorn~=0.35.0
 pydantic~=2.11.7
 token-count~=0.2.1
 scikit-learn~=1.7.1
+docling~=2.46.0
+python-multipart~=0.0.20

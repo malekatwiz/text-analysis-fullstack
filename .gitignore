@@ -13,3 +13,6 @@ build
 **/*.vs/
 **/*.user
 **/launchSettings.json
+
+# Custom files
+**/text-api/uploaded_files/**/*

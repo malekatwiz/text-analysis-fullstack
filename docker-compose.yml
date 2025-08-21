@@ -15,6 +15,10 @@ services:
     container_name: text-api
     ports:
       - "8000:8000"
+    environment:
+      - FILE_UPLOAD_DIR=/app/uploads
+    volumes:
+      - ./backend/text-api/uploaded_files:/app/uploads:rw
   jobsapi:
     build:
       context: ./backend/Jobs
