@@ -1,6 +1,6 @@
 # Jobs Tracking Application
 
-Purpose of this project is to practice building text processing, Retrieval-Augmented Generation (RAG), and other advanced AI techniques.
+Purpose of this project is to practice building text processing, Retrieval-Augmented Generation (RAG), and other advanced AI techniques for data processing and analysis.
 
 ## Architecture
 
@@ -17,6 +17,7 @@ Purpose of this project is to practice building text processing, Retrieval-Augme
 - ASP.NET Core
 - FastAPI
 - MongoDB
+- PostgreSQL + pgvector
 - React
 - Redis
 - Docker

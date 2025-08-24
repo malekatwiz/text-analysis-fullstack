@@ -9,8 +9,11 @@ from pydantic import BaseModel, Field
 from starlette.middleware.cors import CORSMiddleware
 
 import config
+from llm.prompts import PromptsFactory
 from operations.text_operations import TextOperationsFactory, TextOperation
 from pipelines.ingestion import FileIngestionStep, FileIngestionFactory
+from services.similarity import TextSimilarityService
+from services.text_generator import TextGeneratorService
 
 
 class OperationRequest(BaseModel, ABC):
@@ -51,14 +54,14 @@ def get_settings():
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World"}
+    return {"message": "Welcome to the Text Operations API"}
 
 
 from fastapi import APIRouter
 
-text_operations_router = APIRouter(
-    prefix="/text-operations",
-    tags=["text_operations"]
+text_router = APIRouter(
+    prefix="/text",
+    tags=["text"]
 )
 
 def resolve_text_operation(operation_name: str) -> TextOperation:
@@ -72,14 +75,14 @@ def file_ingestion(file_name: str) -> FileIngestionStep:
     file_extension = file_name.split('.')[-1].lower()
     return FileIngestionFactory.create_ingestion_step(file_extension)
 
-@text_operations_router.get("")
+@text_router.get("")
 async def list_operations():
     """
     List all available text operations.
     """
     return {"available_operations": TextOperationsFactory.list_available_operations()}
 
-@text_operations_router.post("/{operation_name}")
+@text_router.post("/{operation_name}")
 async def process_text(request: TextOperationRequest, processor: TextOperation = Depends(resolve_text_operation)):
     try:
         operation_result = processor.run(request.text_content)
@@ -89,6 +92,52 @@ async def process_text(request: TextOperationRequest, processor: TextOperation =
         }
     except Exception as e:
         logging.error(f"Error processing text: {e}")
+        return {"error": str(e)}
+
+class TextSimilarityRequest(BaseModel):
+    text: list[str] = Field(
+        default=[],
+        title="Text List",
+        description="A list of text contents for similarity calculation."
+    )
+
+class TextExtractionRequest(BaseModel):
+    text: str = Field(
+        default="",
+        title="Text Content",
+        description="The text content to extract information from."
+    )
+
+    prompt_id: str = Field(
+        default="",
+        title="Prompt ID",
+        description="Identifier for the extraction prompt to be used."
+    )
+
+@text_router.post("similarity-score")
+async def calculate_similarity_score(request: TextSimilarityRequest):
+    try:
+        processor = TextSimilarityService()
+        operation_result = await processor.compute_similarity(request.text)
+
+        return {
+            "similarity_score": operation_result
+        }
+    except Exception as e:
+        logging.error(f"Error processing text: {e}")
+        return {"error": str(e)}
+
+@text_router.post("extract")
+async def generate_extraction(request: TextExtractionRequest):
+    try:
+        text_generator = TextGeneratorService()
+
+        generated_response = await text_generator.generate_text(request.prompt_id, request.text)
+        return {
+            "extracted_information": generated_response
+        }
+    except Exception as e:
+        logging.error(f"Error processing text extraction: {e}")
         return {"error": str(e)}
 
 files_router = APIRouter(
@@ -136,10 +185,10 @@ async def upload_file(file: UploadFile, settings: config.Configuration = Depends
         logging.error(f"Error processing file: {e}")
         return {"error": str(e)}
 
-app.include_router(text_operations_router)
+app.include_router(text_router)
 app.include_router(files_router)
 
 if __name__ == "__main__":
     import uvicorn
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=get_settings().logging_level)
     uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -38,6 +38,11 @@ services:
     container_name: jobs-db
     ports:
       - "27017:27017"
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "5001:11434"
 networks:
   default:
     name: jobs-tracking-network
